@@ -24,3 +24,56 @@ void CellularAutomaton::init_state(const std::vector<int>& initial_state){
     }
     state = initial_state;
 }
+
+//init state with single  center cell set to 1
+void CellularAutomaton::init_single_center(){
+    std::fill(state.begin(), state.end(), 0);
+    state[size/2] = 1;
+};
+
+int CellularAutomaton::apply_rule(int left, int center, int right) const {
+    //convert 3-cell neighborhood to a pattern index (0-7)
+    int pattern = (left << 2) | (center << 1) | right;
+    //printf("pattern : %d", pattern);
+    return (rule >> pattern) & 1;
+}
+
+
+void CellularAutomaton::evolve(){
+    std::vector<int> new_state(size);
+    for (size_t i = 0; i < size; i++){
+        int left = state[(i-1 + size) % size];
+        int center = state[i];
+        int right = state[(i+1)%size];
+        new_state[i] = apply_rule(left,center,right);
+    }
+    state = new_state;
+}
+
+void CellularAutomaton::evolve_steps(size_t steps){
+    for (size_t i=0;i<steps;i++){
+        evolve();
+    }
+}
+
+std::vector<int> CellularAutomaton::get_state() const {
+    return state;
+};
+
+int CellularAutomaton::get_cell(size_t index) const {
+    if (index >= size){
+        throw std::out_of_range("Cell index out of range");
+    }
+    return state[index];
+}
+
+void CellularAutomaton::set_rule(uint32_t rule_number) {
+    if (rule_number > 255){
+        throw std::invalid_argument("Rule number must be between 0 and 255");
+    }
+    rule = rule_number;
+}
+
+uint32_t CellularAutomaton::get_rule() const{
+    return rule;
+}
