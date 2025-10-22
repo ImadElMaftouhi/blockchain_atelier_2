@@ -20,7 +20,7 @@ public:
     int get_cell(size_t index) const;
     void set_rule(uint32_t rule_number);
     uint32_t get_rule() const;
-    void print_state();
+    void print_state() const;
     std::string state_to_string() const; //get state as binary string
     void reset(); //all zeros
 private:
