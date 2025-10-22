@@ -80,7 +80,7 @@ uint32_t CellularAutomaton::get_rule() const{
 
 void CellularAutomaton::print_state() const {
     for (int cell : state ) {
-        std::cout << (cell ? '█' : ' ');
+        std::cout << (cell ? '#' : ' ');
     }
     std::cout << std::endl;
 }
