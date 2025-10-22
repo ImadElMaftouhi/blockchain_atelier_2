@@ -77,3 +77,23 @@ void CellularAutomaton::set_rule(uint32_t rule_number) {
 uint32_t CellularAutomaton::get_rule() const{
     return rule;
 }
+
+void CellularAutomaton::print_state() const {
+    for (int cell : state ) {
+        std::cout << (cell ? '█' : ' ');
+    }
+    std::cout << std::endl;
+}
+
+std::string CellularAutomaton::state_to_string() const {
+    std::string result;
+    result.reserve(size);
+    for ( int cell : state) {
+        result += (cell ? "1" : "0");
+    }
+    return result;
+}
+
+void CellularAutomaton::reset() {
+    std::fill(state.begin(), state.end(), 0);
+}
