@@ -15,7 +15,7 @@ public:
     void init_state(const std::vector<int>& initial_state);//init a vector of bit
     void init_single_center(); //init state from a single center cell
     void evolve(); //evolve one generation
-    void evolve_setps(size_t steps); //run multiple
+    void evolve_steps(size_t steps); //run multiple
     std::vector<int> get_state() const; 
     int get_cell(size_t index) const;
     void set_rule(uint32_t rule_number);
