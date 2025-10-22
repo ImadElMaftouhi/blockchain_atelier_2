@@ -42,12 +42,12 @@ For each cell, we:
 
 #### Compile the test:
 ```bash
-g++ -std=c++11 cellular_automaton.cpp test_ca.cpp -o test_ca
+g++ -I./include tests/test_ca.cpp src/cellular_automaton.cpp -o ./build/test_ca.exe ; .\build\test_ca.exe
 ```
 
 #### Run the test:
 ```bash
-./test_ca
+./tests/test_ca.exe
 ```
 
 #### Expected Output for Rule 30:
