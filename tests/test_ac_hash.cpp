@@ -97,10 +97,11 @@ void test_text_to_bits_conversion() {
 int main() {
     std::cout << "\n";
     std::cout << "==============================================================\n";
-    std::cout << "|         AC_HASH FUNCTION VERIFICATION TESTS                |\n";
+    std::cout << "|                     AC_HASH FUNCTION TESTS                  |\n";
     std::cout << "==============================================================\n";
     
     test_text_to_bits_conversion();
+    std::cout << "\n Q.2.3 : Answer in README.md, section 2.3";
     test_different_inputs();
     test_same_input_reproducible();
     test_empty_input();

@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 
-// Constructor
+//constructor
 CellularAutomaton::CellularAutomaton(size_t grid_size, uint32_t rule_number)
     : size(grid_size), rule(rule_number) {
     if (rule >255) {
@@ -12,7 +12,7 @@ CellularAutomaton::CellularAutomaton(size_t grid_size, uint32_t rule_number)
     state.resize(size,0);
 }
 
-// init state from a vector
+//init state from a vector
 void CellularAutomaton::init_state(const std::vector<int>& initial_state){
     if (initial_state.size() != size){
         throw std::invalid_argument("Initial state size must match grid size");
