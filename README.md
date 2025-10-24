@@ -560,8 +560,60 @@ g++ -std=c++11 -I./include src/cellular_automaton.cpp src/ac_hash.cpp tests/test
 
 ```terminal
 
-Hash: f4149e7fdc33465c484eb6dc62bfa3d94ac855413a3befea3e2bc9ae50feb6b7
-Percentage of 1 bits: 3.12%
+==============================================================
+=        TEST 6: BIT DISTRIBUTION (ac_hash)            =
+==============================================================
+
+--- Individual tests ---
+
+Input: "Hello, World!"
+Hash: f542fd8056e1376328537fec9a612f636565f9b6fc683ba5aadc16fefe3d0443
+Bits set to 1: 139 / 256
+Percentage: 54.30%
+
+Input: "Blockchain"
+Hash: 5b7f4d047a533a45de3cf321278fb890f4e8834df6a399b1d3030b17035dca31
+Bits set to 1: 128 / 256
+Percentage: 50.00%
+
+Input: "Test message"
+Hash: 57cba362ad10f9f6496970d8cf4eec5c194b926de75e90b903da32d0e462a933
+Bits set to 1: 129 / 256
+Percentage: 50.39%
+
+
+======================================================================
+6.1: Analysis on sample of 400 hashes
+======================================================================
+Hash #0: 130 bits set to 1 (50.78%)
+Hash #1: 131 bits set to 1 (51.17%)
+Hash #2: 123 bits set to 1 (48.05%)
+Hash #3: 127 bits set to 1 (49.61%)
+Hash #4: 149 bits set to 1 (58.20%)
+...
+Hash #399: 120 bits set to 1 (46.88%)
+
+----------------------------------------------------------------------
+GLOBAL RESULTS:
+----------------------------------------------------------------------
+Number of hashes generated: 400
+Total analyzed bits: 102400 bits
+Total bits set to 1: 51017
+Average percentage: 49.82%
+
+======================================================================
+6.2: Stability evaluation
+======================================================================
+Ideal value: 50.00%
+Obtained result: 49.82%
+Deviation: -0.18%
+
+EVALUATION: EXCELLENT - Very well-balanced distribution
+
+======================================================================
+TEST TERMINATED
+======================================================================
+
 
 ```
 
@@ -651,3 +703,271 @@ TEST COMPLETE
 ================================================================================
 
 ```
+## Question 8 - Avantages potentiels d'un hachage basé sur automate cellulaire
+
+Le hachage basé sur automate cellulaire présente plusieurs avantages théoriques pour une blockchain :
+
+### Résistance ASIC potentielle
+- Les automates cellulaires nécessitent une évolution séquentielle état par état, ce qui rend difficile l'optimisation matérielle spécialisée
+- Contrairement à SHA256 qui peut être massivement parallélisé sur des circuits ASIC, l'AC nécessite des calculs séquentiels
+- Cela pourrait favoriser une décentralisation accrue du minage
+
+### Modèle de sécurité alternatif
+- Basé sur la complexité computationnelle des systèmes dynamiques plutôt que sur des opérations algébriques classiques
+- La sécurité provient du comportement chaotique et imprévisible de l'automate (effet papillon)
+- Diversification des approches cryptographiques dans l'écosystème blockchain
+
+### Simplicité mathématique
+- Les règles d'AC sont extrêmement simples (opérations binaires de base)
+- Code minimaliste et facile à vérifier/auditer
+- Transparence totale du mécanisme de hachage
+
+### Flexibilité et adaptabilité
+- Possibilité d'ajuster facilement les paramètres (règle, nombre d'étapes, taille)
+- Potentiel pour créer des variantes résistantes aux attaques futures
+- Peut être combiné avec d'autres fonctions de hachage pour une sécurité renforcée
+
+## Question 9 - Faiblesses et vulnérabilités possibles
+
+Malgré ses avantages théoriques, cette approche présente plusieurs limitations importantes :
+
+### Performance computationnelle
+- **134x plus lent que SHA256** en moyenne (d'après nos tests)
+- Chaque hash nécessite 128+ évolutions séquentielles de l'automate
+- Impact significatif sur la vitesse de validation de la blockchain
+- Consommation énergétique potentiellement plus élevée pour le même niveau de sécurité
+
+### Maturité cryptographique limitée
+- SHA256 a bénéficié de décennies d'analyse cryptographique intensive
+- ac_hash basé sur AC n'a pas d'historique comparable de cryptanalyse
+- Risque de vulnérabilités non découvertes
+- Manque de standardisation et de validation par la communauté cryptographique
+
+### Vulnérabilités spécifiques aux automates
+- Certaines règles (comme Rule 90) produisent des structures fractales prévisibles
+- Risque d'émergence de patterns exploitables avec de mauvais paramètres
+- La dépendance à une seule règle pourrait créer des faiblesses systémiques
+- Distribution des bits parfois déséquilibrée (observée dans nos tests)
+
+### Absence d'optimisation matérielle
+- Pas de support hardware comme SHA256 (instructions CPU dédiées)
+- Pas de bibliothèques optimisées et largement testées
+- Difficulté à atteindre les performances requises pour une blockchain à haute fréquence
+
+### Prévisibilité potentielle
+- La nature déterministe de l'AC pourrait être exploitée
+- Les états intermédiaires pourraient révéler des informations sur l'entrée
+- Besoin d'une analyse approfondie de la résistance aux collisions
+
+## Question 10 - Améliorations et variantes proposées
+
+Voici plusieurs pistes d'amélioration pour renforcer la sécurité et les performances de ac_hash :
+
+### 1. Approche hybride AC + SHA256
+```
+hash_final = SHA256(ac_hash(input) || input)
+```
+**Avantages :**
+- Combine la résistance ASIC de l'AC avec la sécurité prouvée de SHA256
+- Garde la performance de SHA256 comme base
+- Double couche de protection cryptographique
+
+### 2. Règle dynamique basée sur le bloc
+```cpp
+uint32_t rule = (block_height % 3 == 0) ? 30 : 
+                (block_height % 3 == 1) ? 90 : 110;
+```
+**Avantages :**
+- Empêche l'optimisation pour une seule règle
+- Augmente la complexité d'une attaque ciblée
+- Introduit de la variabilité dans le système
+
+### 3. Multi-règles en cascade
+```cpp
+// Évolution successive avec différentes règles
+ca.set_rule(30);  ca.evolve_steps(50);
+ca.set_rule(110); ca.evolve_steps(50);
+ca.set_rule(90);  ca.evolve_steps(28);
+```
+**Avantages :**
+- Bénéficie des propriétés de plusieurs règles
+- Complexité accrue pour l'attaquant
+- Meilleure diffusion des bits
+
+### 4. Voisinage variable adaptatif
+Au lieu de r=1 fixe, utiliser un rayon variable :
+```cpp
+// Rayon basé sur la position dans l'évolution
+int radius = 1 + (generation / 32); // Augmente avec le temps
+```
+**Avantages :**
+- Diffusion plus rapide de l'information
+- Comportement plus complexe et moins prévisible
+
+### 5. Nombre d'étapes adaptatif
+```cpp
+size_t steps = 128 + (input.length() * 2); // Proportionnel à l'entrée
+```
+**Avantages :**
+- Résistance aux attaques basées sur la longueur de l'entrée
+- Meilleur mélange pour les entrées longues
+
+### 6. Injection de sel cryptographique
+```cpp
+std::string salted_input = input + previous_block_hash;
+```
+**Avantages :**
+- Lie chaque hash au contexte de la blockchain
+- Empêche les attaques par pré-calcul
+- Renforce l'unicité de chaque hash
+
+### Recommandation finale
+**Approche hybride multi-règles** : Combiner les variantes 1, 3 et 6 pour obtenir un système robuste qui bénéficie à la fois de la sécurité établie de SHA256 et de l'innovation des automates cellulaires, tout en maintenant des performances acceptables.
+
+## Exercise 11 - Tableau récapitulatif des résultats
+
+### 11.1 Résultats de hachage (Exercise 2)
+
+| Input | Rule | Steps | Hash (64 chars) |
+|-------|------|-------|-----------------|
+| "Hello, World!" | 30 | 128 | `f542fd8056e1376328537fec9a612f636565f9b6fc683ba5aadc16fefe3d0443` |
+| "Hello, World?" | 30 | 128 | `057914ae9e6919e43c3c22a61bc564b255101e1dd360288101ae46cc360b7d9b` |
+| "Blockchain" | 30 | 128 | `5b7f4d047a533a45de3cf321278fb890f4e8834df6a399b1d3030b17035dca31` |
+| "Test message" | 30 | 128 | `57cba362ad10f9f6496970d8cf4eec5c194b926de75e90b903da32d0e462a933` |
+| "" (empty) | 30 | 128 | `0000000000000000000000000000000000000000000000000000000000000000` |
+| " " (space) | 30 | 128 | `744b0203e2611420b149050ae207b4a1e8119700c16dd03bae23e32f54fd7500` |
+
+**Observations :**
+- Tous les hashs ont exactement 256 bits (64 caractères hex)
+- Inputs différents produisent des hashs complètement différents
+- Reproductibilité parfaite (même input = même hash)
+- L'input vide produit un hash nul (cas limite à améliorer)
+
+---
+
+### 11.2 Performance de minage (Exercise 4)
+
+#### Tableau comparatif SHA256 vs AC_HASH
+
+| Hash Method | Difficulty | Blocks | Total Time (ms) | Avg Time (ms) | Total Iterations | Avg Iterations |
+|-------------|-----------|--------|-----------------|---------------|------------------|----------------|
+| **SHA-256** | 1 | 5 | 40 | 8.00 | 127 | 25.40 |
+| **AC HASH** | 1 | 5 | 125 | 25.00 | 56 | 11.20 |
+| **SHA-256** | 2 | 10 | 30 | 3.00 | 2,323 | 232.30 |
+| **AC HASH** | 2 | 10 | 4,039 | 403.90 | 2,276 | 227.60 |
+| **SHA-256** | 3 | 10 | 150 | 15.00 | 41,405 | 4,140.50 |
+| **AC HASH** | 3 | 10 | 98,339 | 9,833.90 | 57,289 | 5,728.90 |
+| **SHA-256** | 4 | 5 | 600 | 120.00 | 183,577 | 36,715.40 |
+| **AC HASH** | 4 | 5 | - | - | - | - |
+
+#### Analyse comparative
+
+| Métrique | Difficulté 2 | Difficulté 3 |
+|----------|--------------|--------------|
+| **Ratio de vitesse** | AC_HASH 134.63x **plus lent** | AC_HASH 655.59x **plus lent** |
+| **Ratio d'itérations** | AC_HASH 0.98x (similaire) | AC_HASH 1.38x (plus d'itérations) |
+
+**Conclusions :**
+- AC_HASH est significativement plus lent que SHA256
+- Le nombre d'itérations reste comparable (distribution similaire)
+- L'écart de performance augmente avec la difficulté
+- Chaque calcul de hash AC prend ~1.7ms vs ~0.013ms pour SHA256
+
+---
+
+### 11.3 Effet avalanche (Exercise 5)
+
+| Métrique | Valeur | Évaluation |
+|----------|--------|------------|
+| **Nombre de tests** | 100 messages | - |
+| **Bits modifiés (moyenne)** | 122.53 / 256 | - |
+| **Pourcentage de changement** | **47.86%** | **EXCELLENT** |
+| **Cible idéale** | 50% | - |
+| **Écart** | -2.14% | Très proche de l'idéal |
+
+**Interprétation :**
+- Excellente diffusion : un seul bit changé modifie ~48% du hash
+- Proche de l'idéal cryptographique (50%)
+- Forte sensibilité aux modifications d'entrée
+- Comportement conforme à un bon algorithme de hachage
+
+---
+
+### 11.4 Distribution des bits (Exercise 6)
+
+#### Tests individuels
+
+| Input | Rule | Steps | Bits à 1 | Pourcentage | Évaluation |
+|-------|------|-------|----------|-------------|------------|
+| "Hello, World!" | 30 | 128 | 139 / 256 | 54.30% | Bon |
+| "Blockchain" | 30 | 128 | 128 / 256 | 50.00% | Parfait |
+| "Test message" | 30 | 128 | 129 / 256 | 50.39% | Excellent |
+
+#### Analyse statistique (échantillon large)
+
+| Métrique | Valeur |
+|----------|--------|
+| **Nombre de hashs générés** | 400 |
+| **Total de bits analysés** | 102,400 bits (> 10^5) |
+| **Total de bits à 1** | 51,017 |
+| **Pourcentage moyen** | **49.82%** |
+| **Écart de l'idéal (50%)** | -0.18% |
+| **Évaluation** | **EXCELLENT** |
+
+**Interprétation :**
+- Distribution quasi-parfaite : 49.82% très proche de l'idéal 50%
+- Écart négligeable de seulement 0.18%
+- Confirme l'excellente qualité cryptographique de ac_hash
+- Validé sur plus de 100,000 bits (10^5)
+
+---
+
+### 11.5 Comparaison des règles (Exercise 7)
+
+| Règle | Temps (µs) | Avalanche (%) | Équilibre bits (%) | Évaluation globale |
+|-------|-----------|---------------|-------------------|-------------------|
+| **30** | 1,559 | 45.70 | 50.39 | **EXCELLENT** |
+| **90** | 2,075 | 22.27 | 50.00 | **FAIBLE** |
+| **110** | 2,063 | 50.39 | 55.08 | **BON** |
+
+#### Analyse détaillée par règle
+
+**Rule 30** (Recommandée) :
+- **Plus rapide** (1,559 µs)
+- **Avalanche excellent** (45.70% ≈ 50%)
+- **Équilibre parfait** (50.39%)
+- Comportement chaotique idéal
+- Prouvée en cryptographie
+
+**Rule 90** :
+- Plus lente (2,075 µs)
+- **Avalanche insuffisant** (22.27% - trop faible)
+- Équilibre correct (50.00%)
+- Structures fractales prévisibles
+- **Non recommandée pour le hachage**
+
+**Rule 110** :
+- Plus lente (2,063 µs)
+- **Excellent avalanche** (50.39%)
+- Équilibre légèrement élevé (55.08%)
+- Complexité Turing-complète
+- Moins étudiée en cryptographie
+
+---
+
+### 11.6 Synthèse globale
+
+| Critère | SHA256 | AC_HASH (Rule 30) | Verdict |
+|---------|--------|-------------------|---------|
+| **Vitesse** | Très rapide | Lent (134x) | SHA256 |
+| **Avalanche** | ~50% | 47.86% | Égalité |
+| **Distribution bits** | ~50% | ~50% | Égalité |
+| **Maturité crypto** | Très éprouvé | Expérimental | SHA256 |
+| **Résistance ASIC** | Faible | Potentiellement forte | AC_HASH |
+| **Simplicité code** | Complexe | Simple | AC_HASH |
+| **Usage blockchain** | Production | Recherche/PoC | SHA256 |
+
+**Conclusion finale :**
+- **Pour une blockchain en production** : SHA256 reste le choix optimal (performance, sécurité prouvée)
+- **Pour la recherche** : AC_HASH offre des perspectives intéressantes (résistance ASIC, diversification)
+- **Approche hybride recommandée** : Combiner les deux pour bénéficier des avantages de chacun
