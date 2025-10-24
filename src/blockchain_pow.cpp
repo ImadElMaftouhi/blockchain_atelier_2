@@ -4,6 +4,14 @@
 #include <iostream>
 #include <chrono>
 
+/**
+ * Constructor for BlockchainPow
+ * @param diff The difficulty of the blockchain
+ * @param mode The hash mode of the blockchain (SHA256_MODE or AC_HASH_MODE)
+ * @param r The CA rule (for AC_HASH_MODE)
+ * @param s The CA steps (for AC_HASH_MODE)
+ * Initializes the blockchain with the given parameters and creates a genesis block
+ */
 BlockchainPow::BlockchainPow(int diff, HashMode mode, uint32_t r, size_t s) 
     : difficulty(diff), hashMode(mode), rule(r), steps(s) {
     
@@ -22,6 +30,13 @@ BlockchainPow::~BlockchainPow() {
     }
 }
 
+/**
+ * Adds a new block to the blockchain
+ * @param transactions A vector of transaction strings to be added to the block
+ * Mines a new block using the given transactions and adds it to the blockchain.
+ * The block is mined using the ProofOfWork::mineBlock function with the given parameters.
+ * The block is then added to the blockchain and the mining duration is printed to the console.
+ */
 void BlockchainPow::addBlock(const std::vector<std::string>& transactions) {
     //combine transactions into a single data string
     std::string data;
@@ -46,6 +61,11 @@ void BlockchainPow::addBlock(const std::vector<std::string>& transactions) {
               << "(" << hashModeToString(hashMode) << ", " << nonce << " iterations)" << std::endl;
 }
 
+/**
+ * Verifies the integrity of the blockchain by checking that each block's
+ * hash is valid and that each block points to the previous block's hash.
+ * @return True if the blockchain is valid, false otherwise.
+ */
 bool BlockchainPow::isChainValid() const {
     for (size_t i = 1; i < chain.size(); i++) {
         BlockPow* currentBlock = chain[i];

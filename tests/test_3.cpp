@@ -1,22 +1,12 @@
 /** test_3.cpp
- * # what the test does:
  * 3.1 - Verifies hash mode selection (SHA256 vs AC_HASH)
  * 3.2 - Tests mining with both hash functions
  * 3.3 - Validates blocks work correctly with both modes
  * Bonus - Tests mixed hash modes in same chain
  * Bonus - Compares different CA rules (30, 90, 110)
  * 
- * #run & compile (MSYS2 MinGW64):
- * g++ -std=c++11 -I./include -IC:\msys64\mingw64\include ^
-    src/cellular_automaton.cpp ^
-    src/ac_hash.cpp ^
-    src/utils.cpp ^
-    src/pow.cpp ^
-    src/block_pow.cpp ^
-    src/blockchain_pow.cpp ^
-    tests/test_3.cpp ^
-    -LC:\msys64\mingw64\lib -lssl -lcrypto ^
-    -o test_3.exe 
+ * run & compile (MSYS2 MinGW64):
+ * g++ -std=c++11 -I./include -IC:\msys64\mingw64\include src/cellular_automaton.cpp src/ac_hash.cpp src/utils.cpp src/pow.cpp src/block_pow.cpp src/blockchain_pow.cpp tests/test_3.cpp -LC:\msys64\mingw64\lib -lssl -lcrypto -o test_3.exe
  * 
  */
 
@@ -33,13 +23,12 @@ void printSeparator(const std::string& title) {
 
 void test_hash_mode_selection() {
     printSeparator("TEST 3.1: Hash Mode Selection");
+    std::cout << "\nNOTE : The hash mode option is configured into the PoW block's mining method." << std::endl;
     
-    // Test SHA256 mode
     std::cout << "\n--- Creating blockchain with SHA256 ---" << std::endl;
     BlockchainPow sha_chain(2, SHA256_MODE);
     std::cout << "+ Blockchain created with hash mode: " << hashModeToString(sha_chain.getHashMode()) << std::endl;
     
-    // Test AC_HASH mode
     std::cout << "\n--- Creating blockchain with AC_HASH ---" << std::endl;
     BlockchainPow ac_chain(2, AC_HASH_MODE, 30, 128);
     std::cout << "+ Blockchain created with hash mode: " << hashModeToString(ac_chain.getHashMode()) << std::endl;
@@ -57,13 +46,13 @@ void test_mining_with_ac_hash() {
         "Bob->Charlie: 30"
     };
     
-    std::cout << "\n--- Mining with SHA256 ---" << std::endl;
-    BlockchainPow sha_chain(2, SHA256_MODE);
-    sha_chain.addBlock(transactions);
-    
     std::cout << "\n--- Mining with AC_HASH (Rule 30) ---" << std::endl;
     BlockchainPow ac_chain(2, AC_HASH_MODE, 30, 128);
     ac_chain.addBlock(transactions);
+    
+    std::cout << "\n--- Mining with SHA256 ---" << std::endl;
+    BlockchainPow sha_chain(2, SHA256_MODE);
+    sha_chain.addBlock(transactions);
     
     std::cout << "\n[PASS] Mining works with both hash methods" << std::endl;
 }
@@ -77,7 +66,6 @@ void test_validation_with_both_modes() {
         "Transaction 3"
     };
     
-    // Test SHA256 validation
     std::cout << "\n--- Testing SHA256 Blockchain Validation ---" << std::endl;
     BlockchainPow sha_chain(2, SHA256_MODE);
     sha_chain.addBlock(transactions);
@@ -86,7 +74,6 @@ void test_validation_with_both_modes() {
     bool sha_valid = sha_chain.isChainValid();
     std::cout << "SHA256 Chain Valid: " << (sha_valid ? "YES" : "NO") << std::endl;
     
-    // Test AC_HASH validation
     std::cout << "\n--- Testing AC_HASH Blockchain Validation ---" << std::endl;
     BlockchainPow ac_chain(2, AC_HASH_MODE, 30, 128);
     ac_chain.addBlock(transactions);
@@ -103,28 +90,27 @@ void test_validation_with_both_modes() {
 }
 
 void test_mixed_hash_modes() {
-    printSeparator("TEST 3.3 (Extended): Mixed Hash Modes in Same Chain");
+    printSeparator("TEST 3.3: Mixed Hash Modes in Same Chain");
     
     std::vector<std::string> transactions = {"Test transaction"};
     
     std::cout << "\n--- Creating chain with SHA256, then switching to AC_HASH ---" << std::endl;
     BlockchainPow chain(2, SHA256_MODE);
     
-    std::cout << "Adding block 1 (SHA256)..." << std::endl;
+    std::cout << "Adding block 1 using SHA256..." << std::endl;
     chain.addBlock(transactions);
     
-    // Switch to AC_HASH
     chain.setHashMode(AC_HASH_MODE, 30, 128);
-    std::cout << "\nSwitched to AC_HASH mode" << std::endl;
+    std::cout << "\nSwitched to AC_HASH mode"  << std::endl;
     
-    std::cout << "Adding block 2 (AC_HASH)..." << std::endl;
+    std::cout << "Adding block 2 using AC_HASH..." << std::endl;
     chain.addBlock(transactions);
     
     std::cout << "\nDisplaying mixed chain:" << std::endl;
     chain.displayChain();
     
     bool valid = chain.isChainValid();
-    std::cout << "\nMixed Chain Valid: " << (valid ? "✓ YES" : "✗ NO") << std::endl;
+    std::cout << "\nMixed Chain Valid: " << (valid ? "YES" : "NO") << std::endl;
     
     if (valid) {
         std::cout << "\n[PASS] Chain supports mixed hash modes" << std::endl;
@@ -136,7 +122,7 @@ void test_mixed_hash_modes() {
 void test_different_rules() {
     printSeparator("TEST: Different CA Rules Comparison");
     
-    std::vector<std::string> transactions = {"Test data"};
+    std::vector<std::string> transactions = {"User1->User2: 10"};
     
     std::cout << "\n--- Mining with Rule 30 ---" << std::endl;
     BlockchainPow chain_r30(2, AC_HASH_MODE, 30, 128);
