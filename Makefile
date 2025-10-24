@@ -1,5 +1,5 @@
 # Makefile for Blockchain Project with Cellular Automate Integration
-# Available commands:
+# Choose and run the desired command in a MSYS2/MinGW terminal:
 # make all         # Build all tests (doesn't run them)
 # make test        # Build and run ALL tests sequentially
 # make test_1      # Build and run only Test 1
